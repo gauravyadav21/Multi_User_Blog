@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{username}}</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<style type="text/css">
+	body{
+		font-family: sans-serif;
+		width: 900px;
+		margin: 0 auto;
+		padding: 10px;
+	}
+	.main-title{
+		display: block;
+		color: #222;
+		text-align: center;
+		margin-bottom: 30px;
+		text-decoration: none;
+	}
+	.art + .art{
+		margin-top : 20px; 
+	}
+	.art-heading{
+		position: relative;
+	}
+	.art-date{
+		position: absolute;
+		right: 0px;
+		bottom: 0px;
+		color: #999;
+	}
+	.art-title{
+		font-weight: bold;
+	}
+	.art-body{
+		margin: 0;
+		font-size: 17px;
+		padding: 10px;
+	}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-inverse">
+	<a class="navbar-brand" href="/blog">Home</a>
+	<a class="navbar-brand" href="/blog/newpost">Newpost</a>
+	<a class="navbar-brand" href="/blog/logout">Logout</a>
+	</nav>
+	<br>
+	<h1 class="main-title">Welcome {{username}}</h1>
+	<br><br>
+	{%for i in p%}
+		<a href = "/blog/post/{{i.key().id()}}">
+		<div class="art">
+			<div class="art-heading">
+				<div class="art-title"><h4>Title: {{i.title}}</h4></div>
+				<div class="art-date">{{i.created.strftime("%b %d, %Y")}}</div>
+			</div>
+			<pre class="art-body">Post:<br> {{i.post}}</pre>
+		</div></a>
+		<hr>
+	{%endfor%}
+</body>
+</html>

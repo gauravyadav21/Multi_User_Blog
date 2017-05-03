@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Muti User Blog</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<style type="text/css">
+	body{
+		font-family: sans-serif;
+		width: 900px;
+		margin: 0 auto;
+		padding: 10px;
+	}
+	.art + .art{
+		margin-top : 20px; 
+	}
+	.art-heading{
+		position: relative;
+	}
+	.art-date{
+		position: absolute;
+		right: 0px;
+		bottom: 0px;
+		color: #999;
+	}
+	.comment-date{
+		width:500px;
+		position: absolute;
+		right: 0px;
+		bottom: 0px;
+		color: #999;
+	}
+	.art-title{
+		font-weight: bold;
+	}
+	.comment-title{
+		width:500px;
+		font-weight: bold;
+	}
+	.art-body{
+		margin: 0;
+		font-size: 17px;
+		padding: 10px;
+	}
+	.comment-body{
+		width: 500px;
+		margin: 0;
+		font-size: 17px;
+		padding: 10px;
+	}
+	.hr1{
+		margin: 20px auto;
+	}
+	.hr2{
+		width: 500px;
+		margin: 20px auto;
+	}
+	.error{
+		color: #ff0000;
+	}
+	</style>
+</head>
+</style>
+<body>
+	<nav class="navbar navbar-inverse">
+	<a class="navbar-brand" href="/blog">Home</a>
+	<a class="navbar-brand" href="/blog/newpost">Newpost</a>
+	<a class="navbar-brand" href="/blog/login">Login</a>
+	<a class="navbar-brand" href="/blog/signup">Signup</a>
+	</nav>
+		<div class="art">
+			<div class="art-heading">
+				<div class="art-title"><h3>{{post.author}}</h3></div>
+				<div class="art-title"><h4>Title: {{post.title}}</h4></div>
+				<div class="art-date">{{post.created.strftime("%b %d, %Y")}}</div>
+			</div>
+			<hr class="hr1">
+			<pre class="art-body">Post:<br> {{post.post}}</pre>
+		</div>
+		<br>
+	<div class="like">
+		<form method="post">
+		<input type="submit" class="btn btn-primary" name = "like" value="Like: {{l}}">
+		<input type="submit" class="btn btn-primary" name = "unlike" value="Unlike: {{ul}}">
+		<input type="submit" class="btn btn-primary" name = "edit" value="Edit">
+		<input type="submit" class="btn btn-primary" name = "delete" value="Delete">
+		<label class= "error" class="control-label" >{{msg}}</label><br><br>
+		<div class= "col-sm-5">
+		<input type="text" class="form-control" name = "comment">
+		</div>		
+		<input type="submit" class="btn btn-primary" name = "comments" value="Comment">
+		<hr class="hr2">
+		</form>	
+		{%for i in comments%}
+			<div class="art">
+				<div class="art-heading">
+					<div class="comment-title"><h3>By {{i.name}}</h3></div>
+					<div class="comment-date">{{i.created.strftime("%b %d, %Y")}}</div>
+				</div>
+			<pre class="comment-body">Comment:<br> {{i.post}}</pre>
+			<br>
+			</div>
+			<a href="/blog/post/{{i.key().id()}}/editcomment"><input type="submit" class="btn btn-primary" name = "edit_comment" value="Edit"></a>
+			<a href="/blog/post/{{i.key().id()}}/deletecomment"><input type="submit" class="btn btn-primary" class="btn btn-primary" name = "delete_comment" value="Delete"></a>
+			<br><br>						
+	</div>
+		{%endfor%}
+	
