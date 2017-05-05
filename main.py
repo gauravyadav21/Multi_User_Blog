@@ -228,11 +228,14 @@ class Login(Handler):
         else:
             self.render("login.html")
     def post(self):
+        u = self.get_cookie()
+        if not u:
+            self.redirect('/blog/login')
         username = self.request.get("username")
         password = self.request.get("password")
-        u = User.login(username, password)
-        if u:
-            self.set_cookie(u.username)
+        i = User.login(username, password)
+        if i:
+            self.set_cookie(i.username)
             self.redirect('/blog/welcome')
         else:
             self.render("login.html",error="Username or password is wrong.")
@@ -266,6 +269,8 @@ class PostPage(Handler):
             ul = Unlike.get_unlikes(int(id))
             obj = db.GqlQuery('SELECT * FROM Comment WHERE post_id=:1 order by created desc', int(id))
             self.render("postpage.html", post = t, l=l, ul= ul, comments = obj)
+        else:
+            self.redirect('/blog')
 
     def post(self, id):
         u = self.get_cookie()
@@ -369,25 +374,28 @@ class EditPost(Handler):
         key = db.Key.from_path('Database',int( id ),parent = blog_key())
         t = db.get(key)
         if not t:
+            self.redirect('/blog')
+        else:
             u = self.get_cookie()
             if not u:
                 self.redirect('/blog/login')
             i = self.request.get('cancel')
             if i:
                 self.redirect('/blog/post/%s'%t.key().id())
-            title = self.request.get('title')
-            post = self.request.get('post')
-            if title and post:
-                t.title = title
-                t.post = post
-                t.put()
-                self.redirect('/blog/post/%s'%t.key().id())
+            if u == t.author:
+                title = self.request.get('title')
+                post = self.request.get('post')
+                if title and post:
+                    t.title = title
+                    t.post = post
+                    t.put()
+                    self.redirect('/blog/post/%s'%t.key().id())
+                else:
+                    error = "Both fields should be filled"
+                    self.render("editpost.html",error = error,p = t)
             else:
-                error = "Both fields should not be blank"
-                self.render("editpost.html",error = error,post = t)
-        else:
-            self.redirect('/blog')
-
+                self.redirect('/blog')
+            
 
 class EditComment(Handler):
     def get(self, id):
@@ -413,6 +421,8 @@ class EditComment(Handler):
         key = db.Key.from_path('Comment',int( id ))
         t = db.get(key)
         if not t:
+            self.redirect('/blog')
+        else:
             if not u:
                 self.redirect('/blog/login')
             i = self.request.get('cancel')
@@ -429,8 +439,7 @@ class EditComment(Handler):
                     self.render("editcomment.html",error = error,p = t)
             else:
                 self.redirect('/blog')
-        else:
-            self.redirect('/blog')
+            
 
 
 class DeleteComment(Handler):
