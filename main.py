@@ -279,6 +279,8 @@ class PostPage(Handler):
         else:
             key = db.Key.from_path('Database',int( id ),parent = blog_key())
             t = db.get(key)
+            if not t:
+                self.redirect('/blog')
             l = Like.get_likes(int(id))
             obj = db.GqlQuery('SELECT * FROM Comment WHERE post_id=:1 order by created desc', int(id))
             ul = Unlike.get_unlikes(int(id))        
@@ -337,8 +339,10 @@ class LikeHandler(Handler):
             if not u:
             	self.redirect('/blog/login')
             else:
-            	Like.put_data(post_id = int(id), name = u)
-            	self.redirect('/blog/post/%s'%t.key().id())       
+                a = Like.by_name(str(u) , int(id))
+                if t.author == u or a == 1:
+                    Like.put_data(post_id = int(id), name = u)
+                self.redirect('/blog/post/%s'%t.key().id())
         else:
             self.redirect('/blog')                    
 
@@ -352,7 +356,9 @@ class UnlikeHandler(Handler):
             if not u:
             	self.redirect('/blog/login')
             else:
-            	Unlike.put_data(post_id = int(id), name = u)
+                a = Unlike.by_name(str(u) , int(id))
+                if t.author == u or a == 1:
+                    Unlike.put_data(post_id = int(id), name = u)
             	self.redirect('/blog/post/%s'%t.key().id())       
         else:
             self.redirect('/blog')
