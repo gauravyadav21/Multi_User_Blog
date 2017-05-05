@@ -128,6 +128,7 @@ class Like(db.Model):
         i = db.GqlQuery('SELECT * FROM Like WHERE post_id=:1 and name =:2', _id, u)
         return i.count()
 
+
 class Unlike(db.Model):
     post_id = db.IntegerProperty(required = True)
     name = db.StringProperty(required = True)    
@@ -158,6 +159,7 @@ class Comment(db.Model):
     def put_data(cls, post_id, name, post):
         obj = Comment( post_id= post_id, name = name, post=post)
         obj.put()
+
 
 class Signup(Handler):
     def get(self):
@@ -210,6 +212,7 @@ class Blog(Handler):
     def get(self):
         obj = Database.all().order('-created')
         self.render("home.html",database = obj)
+
  
 class Logout(Handler):
     def get(self):
@@ -263,6 +266,7 @@ class PostPage(Handler):
             ul = Unlike.get_unlikes(int(id))
             obj = db.GqlQuery('SELECT * FROM Comment WHERE post_id=:1 order by created desc', int(id))
             self.render("postpage.html", post = t, l=l, ul= ul, comments = obj)
+
     def post(self, id):
         u = self.get_cookie()
         if not u:
@@ -281,9 +285,7 @@ class PostPage(Handler):
                     else:
                         self.render("postpage.html",post = t, msg="You already liked this post", l = l, ul = ul,comments = obj)
                 else:
-                    Like.put_data(post_id = int(id), name = u)
-                    l = Like.get_likes(int(id))                    
-                    self.render("postpage.html", post = t, l=l,ul= ul, comments= obj)
+                    self.redirect('/blog/post/%s/like'%t.key().id())
 
             if self.request.get('unlike'):
                 a = Unlike.by_name(str(u) , int(id))
@@ -293,9 +295,8 @@ class PostPage(Handler):
                     else:
                         self.render("postpage.html",post = t, msg="You already unliked this post", l=l, ul = ul, comments = obj)
                 else:
-                    Unlike.put_data(post_id = int(id), name = u)
-                    ul = Unlike.get_unlikes(int(id))
-                    self.render("postpage.html", post = t,msg="", l=l, ul=l, comments =obj)
+                    self.redirect('/blog/post/%s/unlike'%t.key().id())
+
             
             if self.request.get('delete'):
                 if t.author == u:
@@ -322,12 +323,42 @@ class PostPage(Handler):
                                         l=l, ul = ul, comments = obj)
 
 
+class LikeHandler(Handler):
+    def get(self,id):
+        key = db.Key.from_path('Database',int( id ),parent = blog_key())
+        t = db.get(key)
+        if t:
+            u = self.get_cookie()
+            Like.put_data(post_id = int(id), name = u)
+            self.redirect('/blog/post/%s'%t.key().id())       
+        else:
+            self.redirect('/blog')                    
+
+
+class UnlikeHandler(Handler):
+    def get(self,id):
+        key = db.Key.from_path('Database',int( id ),parent = blog_key())
+        t = db.get(key)
+        if t:
+            u = self.get_cookie()
+            Unlike.put_data(post_id = int(id), name = u)
+            self.redirect('/blog/post/%s'%t.key().id())       
+        else:
+            self.redirect('/blog')
+                    
 
 class EditPost(Handler):
     def get(self, id):
         key = db.Key.from_path('Database',int( id ),parent = blog_key())
         t = db.get(key)
-        self.render("editpost.html", p = t)
+        if t:
+            u = self.get_cookie()
+            if not u:
+                self.redirect('/blog/login')
+            else:
+                self.render("editpost.html", p = t)         
+        else:
+            self.redirect('/blog')
     def post(self, id):
         key = db.Key.from_path('Database',int( id ),parent = blog_key())
         t = db.get(key)
@@ -348,19 +379,22 @@ class EditPost(Handler):
 
 class EditComment(Handler):
     def get(self, id):
-        u = self.get_cookie()
-        if not u:
-            self.redirect('/blog/login')
         key = db.Key.from_path('Comment',int( id ))
         t = db.get(key)
-        u = self.get_cookie()
-        if u == t.name:
-            self.render("editcomment.html", p = t)
+        if not t:
+            self.redirect('/blog')
         else:
-            l = Like.get_likes(int(id))
-            ul = Unlike.get_unlikes(int(id))
-            obj = Comment.all().order('-created')
-            self.render("postpage.html", post = t,msg3="You cannot edit this comment", l=l, ul= ul, comments = obj)
+            u = self.get_cookie()
+            if not u:
+                self.redirect('/blog/login')       
+            u = self.get_cookie()
+            if u == t.name:
+                self.render("editcomment.html", p = t)
+            else:
+                l = Like.get_likes(int(id))
+                ul = Unlike.get_unlikes(int(id))
+                obj = Comment.all().order('-created')
+                self.render("postpage.html", post = t,msg3="You cannot edit this comment", l=l, ul= ul, comments = obj)
 
     def post(self, id):
         u = self.get_cookie()
@@ -378,8 +412,6 @@ class EditComment(Handler):
         else:
             error = "Fields should not be blank"
             self.render("editcomment.html",error = error,p = t)
-
-
 
 
 class DeleteComment(Handler):
@@ -417,6 +449,8 @@ app = webapp2.WSGIApplication([
     ('/blog/signup', Signup),
     ('/blog/welcome',Welcome),
     ('/blog/logout', Logout),
+    ('/blog/post/([0-9]+)/like', LikeHandler),
+    ('/blog/post/([0-9]+)/unlike', UnlikeHandler),
     ('/blog/post/([0-9]+)', PostPage),
     ('/blog/post/([0-9]+)/edit', EditPost),
     ('/blog/post/([0-9]+)/editcomment', EditComment),
