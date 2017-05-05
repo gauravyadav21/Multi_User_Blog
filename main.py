@@ -329,8 +329,11 @@ class LikeHandler(Handler):
         t = db.get(key)
         if t:
             u = self.get_cookie()
-            Like.put_data(post_id = int(id), name = u)
-            self.redirect('/blog/post/%s'%t.key().id())       
+            if not u:
+            	self.redirect('/blog/login')
+            else:
+            	Like.put_data(post_id = int(id), name = u)
+            	self.redirect('/blog/post/%s'%t.key().id())       
         else:
             self.redirect('/blog')                    
 
@@ -341,8 +344,11 @@ class UnlikeHandler(Handler):
         t = db.get(key)
         if t:
             u = self.get_cookie()
-            Unlike.put_data(post_id = int(id), name = u)
-            self.redirect('/blog/post/%s'%t.key().id())       
+            if not u:
+            	self.redirect('/blog/login')
+            else:
+            	Unlike.put_data(post_id = int(id), name = u)
+            	self.redirect('/blog/post/%s'%t.key().id())       
         else:
             self.redirect('/blog')
                     
@@ -362,19 +368,25 @@ class EditPost(Handler):
     def post(self, id):
         key = db.Key.from_path('Database',int( id ),parent = blog_key())
         t = db.get(key)
-        i = self.request.get('cancel')
-        if i:
-            self.redirect('/blog/post/%s'%t.key().id())
-        title = self.request.get('title')
-        post = self.request.get('post')
-        if title and post:
-            t.title = title
-            t.post = post
-            t.put()
-            self.redirect('/blog/post/%s'%t.key().id())
+        if not t:
+            u = self.get_cookie()
+            if not u:
+                self.redirect('/blog/login')
+            i = self.request.get('cancel')
+            if i:
+                self.redirect('/blog/post/%s'%t.key().id())
+            title = self.request.get('title')
+            post = self.request.get('post')
+            if title and post:
+                t.title = title
+                t.post = post
+                t.put()
+                self.redirect('/blog/post/%s'%t.key().id())
+            else:
+                error = "Both fields should not be blank"
+                self.render("editpost.html",error = error,post = t)
         else:
-            error = "Both fields should not be blank"
-            self.render("editpost.html",error = error,post = t)
+            self.redirect('/blog')
 
 
 class EditComment(Handler):
@@ -400,46 +412,64 @@ class EditComment(Handler):
         u = self.get_cookie()
         key = db.Key.from_path('Comment',int( id ))
         t = db.get(key)
-        i = self.request.get('cancel')
-        if i:
-            self.redirect('/blog')
-        comment = self.request.get('comment')
-        if comment:
-            t.post = comment
-            t.put()
-            self.redirect('/blog')
-
+        if not t:
+            if not u:
+                self.redirect('/blog/login')
+            i = self.request.get('cancel')
+            if i:
+                self.redirect('/blog')
+            if u == t.name:
+                comment = self.request.get('comment')
+                if comment:
+                    t.post = comment
+                    t.put()
+                    self.redirect('/blog')
+                else:
+                    error = "Fields should not be blank"
+                    self.render("editcomment.html",error = error,p = t)
+            else:
+                self.redirect('/blog')
         else:
-            error = "Fields should not be blank"
-            self.render("editcomment.html",error = error,p = t)
+            self.redirect('/blog')
 
 
 class DeleteComment(Handler):
     def get(self, id):
-        u = self.get_cookie()
-        if not u:
-            self.redirect('/blog/login')
         key = db.Key.from_path('Comment',int( id ))
         t = db.get(key)
-        u = self.get_cookie()
-        if u == t.name:
-            self.render("deletecomment.html")
+        if not t:
+            self.redirect('/blog')
         else:
-            l = Like.get_likes(int(id))
-            ul = Unlike.get_unlikes(int(id))
-            obj = Comment.all().order('-created')
-            self.render("postpage.html", post = t,msg3="You cannot delete this comment", l=l, ul= ul, comments = obj)
+            u = self.get_cookie()
+            if not u:
+                self.redirect('/blog/login')       
+            u = self.get_cookie()
+            if u == t.name:
+                self.render("deletecomment.html", p = t)
+            else:
+                l = Like.get_likes(int(id))
+                ul = Unlike.get_unlikes(int(id))
+                obj = Comment.all().order('-created')
+                self.render("postpage.html", post = t,msg3="You cannot delete this comment", l=l, ul= ul, comments = obj)
 
     def post(self, id):
         u = self.get_cookie()
         key = db.Key.from_path('Comment',int( id ))
         t = db.get(key)
-        l = Like.get_likes(int(id))
-        ul = Unlike.get_unlikes(int(id))
-        obj = Comment.all().order('-created')       
-        if self.request.get('Yes'):
-            t.delete()
-            time.sleep(0.1)
+        if t:
+            if not u:
+                self.redirect('/blog/login')
+            else:
+                u = self.get_cookie()
+                if not u:
+                    self.redirect('/blog/login')
+                if u == t.name:
+                    l = Like.get_likes(int(id))
+                    ul = Unlike.get_unlikes(int(id))
+                    obj = Comment.all().order('-created')
+                    if self.request.get('Yes'):
+                        t.delete()
+                        time.sleep(0.1)
         self.redirect('/blog')
 
 
