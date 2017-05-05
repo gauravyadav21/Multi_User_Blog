@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{% block title %}{% endblock%}</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<style type="text/css">
+	body{
+		font-family: sans-serif;
+		width: 900px;
+		margin: 0 auto;
+		padding: 10px;
+	}
+	hr{
+		margin: 20px auto;
+	}
+	.art + .art{
+		margin-top : 20px; 
+	}
+	.art-heading{
+		position: relative;
+	}
+	.art-date{
+		position: absolute;
+		right: 0px;
+		bottom: 0px;
+		color: #999;
+	}
+	.art-title{
+		font-weight: bold;
+	}
+	.art-body{
+		margin: 0;
+		font-size: 17px;
+		padding: 10px;
+	}
+	.main-title{
+		display: block;
+		color: #222;
+		text-align: center;
+		margin-bottom: 30px;
+		text-decoration: none;
+	}
+	.main-title-left{
+		display: block;
+		color: #222;
+		text-align: left;
+		margin-bottom: 30px;
+		text-decoration: none;
+	}
+	.comment-date{
+		width:500px;
+		position: absolute;
+		right: 0px;
+		bottom: 0px;
+		color: #999;
+	}
+	.comment-title{
+		width:500px;
+		font-weight: bold;
+	}
+	.comment-body{
+		width: 500px;
+		margin: 0;
+		font-size: 17px;
+		padding: 10px;
+	}
+	.hr1{
+		margin: 20px auto;
+	}
+	.hr2{
+		width: 500px;
+		margin: 20px auto;
+	}
+	.error{
+		color: #ff0000;
+	}
+</style>
+</head>
+<body>
+	{% block content %}
+    {% endblock %}
+</body>
+</html>

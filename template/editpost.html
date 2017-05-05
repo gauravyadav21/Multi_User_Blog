@@ -1,28 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>EditPost</title>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<style type="text/css">
-	body{
-		font-family: sans-serif;
-		width: 900px;
-		margin: 0 auto;
-		padding: 10px;
-	}
-	.main-title{
-		display: block;
-		color: #222;
-		text-align: left;
-		text-decoration: none;
-		padding: 15px;
-	}
-	.error{
-		color: #ff0000;
-	}
-	</style>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Multi User Blog{% endblock%}
+{% block content %}
 	<nav class="navbar navbar-inverse">
 	<a class="navbar-brand" href="/blog">Home</a>
 	<a class="navbar-brand" href="/blog/newpost">Newpost</a>
@@ -52,5 +30,4 @@
 			</div>
 		</form>
 		<label class= "error" class="control-label col-sm-12">{{error}}</label>
-</body>
-</html>
+{% endblock%}
